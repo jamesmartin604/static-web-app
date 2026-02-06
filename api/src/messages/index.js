@@ -1,30 +1,20 @@
 const { app } = require('@azure/functions');
-
-let messages = [];
-let nextId = 1;
+const { getMessages, addMessage } = require('../data');
 
 app.http('messages', {
   methods: ['GET', 'POST'],
   authLevel: 'anonymous',
   handler: async (request, context) => {
     if (request.method === 'GET') {
-      return { body: messages };
+      return { body: getMessages() };
     }
 
     if (request.method === 'POST') {
       const body = await request.json();
-      const message = {
-        id: nextId++,
-        text: body.text || "No text"
-      };
-      messages.push(message);
-
-      return {
-        status: 201,
-        body: message
-      };
+      const msg = addMessage(body.text || "No text");
+      return { status: 201, body: msg };
     }
 
-    return { status: 405, body: "method not allowed" };
+    return { status: 405, body: "Method not allowed" };
   }
 });
