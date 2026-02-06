@@ -1,44 +1,68 @@
 <!DOCTYPE html>
-<html lang ="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content ="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="styles.css">
-        <title>Vanilla JavaScript App</title>
-    </head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Vanilla JavaScript App</title>
+</head>
+<body>
+  <main>
+    <h1>Vanilla JS App</h1>
 
-    <body>
-        <main>
-            <h1>Vanilla JS App</h1>
-            <p>Loading content from the API: <b id="name">...</b></p>
-        </main>
+    <div>
+      <label for="msg">New message:</label>
+      <input id="msg" type="text" placeholder="Type a message" />
+      <button id="add">Add</button>
+    </div>
 
-        <script>
-        async function getMessages() {
-            const res = await fetch('/api/messages');
-            return await res.json();
-        }
+    <h2>Messages</h2>
+    <ul id="list"></ul>
+  </main>
 
-        async function createMessage(text) {
-            const res = await fetch('/api/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text })
-            });
-            return await res.json();
-        }
+  <script>
+    async function getMessages() {
+      const res = await fetch('/api/messages');
+      return await res.json();
+    }
 
-        async function show() {
-            const msgs = await getMessages();
-            document.querySelector('#name').textContent = msgs.length ? msgs[0].text : "No messages yet";
+    async function createMessage(text) {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      return await res.json();
+    }
 
-            // create a new message for demo
-            const newMsg = await createMessage("Hello from CRUD!");
-            console.log("Created:", newMsg);
-        }
+    async function show() {
+      const list = document.querySelector('#list');
+      list.innerHTML = '';
 
-        show();
-        </script>
+      const msgs = await getMessages();
 
-    </body>
+      if (!msgs.length) {
+        list.innerHTML = '<li>No messages yet</li>';
+        return;
+      }
+
+      msgs.forEach(m => {
+        const li = document.createElement('li');
+        li.textContent = `${m.id}: ${m.text}`;
+        list.appendChild(li);
+      });
+    }
+
+    document.querySelector('#add').addEventListener('click', async () => {
+      const text = document.querySelector('#msg').value.trim();
+      if (!text) return;
+
+      await createMessage(text);
+      document.querySelector('#msg').value = '';
+      show();
+    });
+
+    show();
+  </script>
+</body>
 </html>
