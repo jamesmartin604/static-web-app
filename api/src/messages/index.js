@@ -5,6 +5,7 @@ app.http('messages', {
   methods: ['GET', 'POST'],
   authLevel: 'anonymous',
   handler: async (request, context) => {
+
     if (request.method === 'GET') {
       return { body: getMessages() };
     }
