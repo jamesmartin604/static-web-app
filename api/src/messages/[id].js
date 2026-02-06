@@ -1,9 +1,7 @@
 const { app } = require('@azure/functions');
+const { getMessages, updateMessage, deleteMessage } = require('../data');
 
-let messages = [];
-let nextId = 1;
-
-app.http('messagesById', {
+app.http('messageById', {
   methods: ['GET', 'PUT', 'DELETE'],
   route: 'messages/{id}',
   authLevel: 'anonymous',
@@ -11,23 +9,19 @@ app.http('messagesById', {
     const id = parseInt(context.bindingData.id, 10);
 
     if (request.method === 'GET') {
-      const msg = messages.find(m => m.id === id);
+      const msg = getMessages().find(m => m.id === id);
       return { status: msg ? 200 : 404, body: msg || "Not found" };
     }
 
     if (request.method === 'PUT') {
       const body = await request.json();
-      const msg = messages.find(m => m.id === id);
-
-      if (!msg) return { status: 404, body: "Not found" };
-
-      msg.text = body.text || msg.text;
-      return { status: 200, body: msg };
+      const msg = updateMessage(id, body.text);
+      return { status: msg ? 200 : 404, body: msg || "Not found" };
     }
 
     if (request.method === 'DELETE') {
-      messages = messages.filter(m => m.id !== id);
-      return { status: 204 };
+      const deleted = deleteMessage(id);
+      return { status: deleted ? 204 : 404 };
     }
 
     return { status: 405, body: "Method not allowed" };
