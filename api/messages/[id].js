@@ -1,5 +1,5 @@
 const { app } = require('@azure/functions');
-const { getMessages, updateMessage, deleteMessage } = require('../data');
+const { getMessages, updateMessage, deleteMessage } = require('../src/data');
 
 app.http('messageById', {
   methods: ['GET', 'PUT', 'DELETE'],
